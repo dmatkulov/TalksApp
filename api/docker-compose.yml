@@ -1,0 +1,64 @@
+#services:
+#  express-app:
+#    build: .
+#    ports:
+#      - '3000:3000'
+#    depends_on:
+#      - db
+#    environment:
+#      DATABASE_URL: 'mongodb://monty:pass@db:27017/db?authSource=admin&directConnection=true'
+#
+#  react-app:
+#    build: ../react-client
+#    ports:
+#      - '80:80'
+#
+#  db:
+#    image: prismagraphql/mongo-single-replica:4.4.3-bionic
+#    platform: linux/amd64
+#    ports:
+#      - '27017:27017'
+#    environment:
+#      MONGO_INITDB_ROOT_USERNAME: monty
+#      MONGO_INITDB_ROOT_PASSWORD: pass
+#
+#volumes:
+#  react_app:
+
+version: '3'
+
+services:
+  express-app:
+    build: .
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: 'mongodb://monty:pass@db:27017/db?authSource=admin&directConnection=true'
+
+  prisma-studio:
+    build: .
+    command: npx prisma studio --hostname 0.0.0.0 --port 5555
+    ports:
+      - '5555:5555'
+    depends_on:
+      - db
+      - react-app
+    environment:
+      DATABASE_URL: 'mongodb://monty:pass@db:27017/db?authSource=admin&directConnection=true'
+
+  db:
+    image: prismagraphql/mongo-single-replica:4.4.3-bionic
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: monty
+      MONGO_INITDB_ROOT_PASSWORD: pass
+
+  react-app: # React-приложение
+    build: ../react-client # Путь к вашему React-приложению относительно корня вашего проекта
+    ports:
+      - '8000:8000' # Порт, на котором будет доступно ваше React-приложение
+volumes:
+  react_app: # Объявление именованного тома
